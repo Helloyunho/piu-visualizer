@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, use, useMemo } from 'react'
+import { PlayIcon, PauseIcon, SquareIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldLabel } from '@/components/ui/field'
@@ -19,6 +20,18 @@ export function App () {
   const assets = use(loadedAssets)
   const [autoVelocity, setAutoVelocity] = useState<number>(300)
   const scrollSpeed = useMemo(() => autoVelocity / (parsedChart?.blocks[0].bpm ?? autoVelocity) / 4, [autoVelocity, parsedChart])
+  const [isPlaying, setIsPlaying] = useState<boolean>(false)
+
+  useEffect(() => {
+    if ('mediaSession' in navigator) {
+      navigator.mediaSession.setActionHandler('play', () => {})
+      navigator.mediaSession.setActionHandler('pause', () => {})
+      navigator.mediaSession.setActionHandler('seekbackward', () => {})
+      navigator.mediaSession.setActionHandler('seekforward', () => {})
+      navigator.mediaSession.setActionHandler('previoustrack', () => {})
+      navigator.mediaSession.setActionHandler('nexttrack', () => {})
+    }
+  }, [])
 
   useEffect(() => {
     const parseStepFile = async () => {
@@ -45,10 +58,20 @@ export function App () {
   }, [stepFile])
 
   useEffect(() => {
+    const handlePlayingStateChange = () => {
+      setIsPlaying(!audio.current?.paused)
+    }
+
     if (audioFile) {
       const audioUrl = URL.createObjectURL(audioFile)
       audio.current = new Audio(audioUrl)
+      audio.current.addEventListener('ended', handlePlayingStateChange)
+      audio.current.addEventListener('play', handlePlayingStateChange)
+      audio.current.addEventListener('pause', handlePlayingStateChange)
     } else {
+      audio.current?.removeEventListener('ended', handlePlayingStateChange)
+      audio.current?.removeEventListener('play', handlePlayingStateChange)
+      audio.current?.removeEventListener('pause', handlePlayingStateChange)
       audio.current = null
     }
   }, [audioFile])
@@ -78,15 +101,30 @@ export function App () {
       {stepFile && audioFile && audio && parsedChart && assets && (
         <div className='flex flex-col gap-4 w-full h-full items-center'>
           <div className='flex gap-4'>
-            <Button onClick={() => audio.current?.play()}>Play</Button>
-            <Button onClick={() => audio.current?.pause()}>Pause</Button>
+            {
+              isPlaying
+                ? (
+                    <Button className='w-20' onClick={() => audio.current?.pause()}>
+                      <PauseIcon />
+                      Pause
+                    </Button>
+                  )
+                : (
+                    <Button className='w-20' onClick={() => audio.current?.play()}>
+                      <PlayIcon data-icon='inline-start' />
+                      Play
+                    </Button>
+                  )
+            }
             <Button onClick={() => {
               if (audio.current) {
                 audio.current.pause()
                 audio.current.currentTime = 0
               }
             }}
-            >Stop
+            >
+              <SquareIcon data-icon='inline-start' />
+              Stop
             </Button>
           </div>
           <div className='flex w-full h-full gap-4 justify-center'>

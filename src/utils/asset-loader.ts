@@ -21,7 +21,7 @@ export type PreloadAssets = {
   hitSilhouettes: HTMLCanvasElement[]
 }
 
-export const loadChartAssets = async (): Promise<PreloadAssets> => {
+const loadAssetsAsync = async (): Promise<PreloadAssets> => {
   const loadImage = (url: string): Promise<HTMLImageElement> => {
     return new Promise((resolve, reject) => {
       const img = new Image()
@@ -73,4 +73,14 @@ export const loadChartAssets = async (): Promise<PreloadAssets> => {
   })
 
   return { notes, inactives, longs, hitSilhouettes }
+}
+
+let cachedPromises: Promise<PreloadAssets> | null = null
+
+export const loadChartAssets = (): Promise<PreloadAssets> => {
+  if (cachedPromises) {
+    return cachedPromises
+  }
+  cachedPromises = loadAssetsAsync()
+  return cachedPromises
 }
