@@ -7,6 +7,7 @@ import { parseNX20 } from '@/parsers/nx20'
 import { parseUCS } from '@/parsers/ucs'
 import { ChartPlayer } from '@/components/player'
 import { loadChartAssets } from '@/utils/asset-loader'
+import { PadPlayer } from '@/components/pad'
 
 const loadedAssets = loadChartAssets()
 
@@ -88,8 +89,11 @@ export function App () {
             >Stop
             </Button>
           </div>
-          <div className='w-full max-w-200 h-full p-4 bg-background rounded-md border'>
-            <ChartPlayer chart={parsedChart} audioRef={audio} scrollSpeed={scrollSpeed} assets={assets} />
+          <div className='flex w-full h-full gap-4 justify-center'>
+            <div className='w-full max-w-200 h-full p-4 bg-background rounded-md border'>
+              <ChartPlayer chart={parsedChart} audioRef={audio} scrollSpeed={scrollSpeed} assets={assets} />
+            </div>
+            <PadPlayer chart={parsedChart} audioRef={audio} />
           </div>
         </div>
       )}

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useMemo } from 'react'
 import type { PreloadAssets } from '@/utils/asset-loader'
 import { type Chart, type Note, PAD_COUNT_MAP } from '@/types/chart'
+import { useAnimationManager } from '@/components/animation-provider'
 
 interface ChartPlayerProps {
   chart: Chart
@@ -17,12 +18,12 @@ const padIndexMap: Record<Chart['type'], number[]> = {
 
 export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: ChartPlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const { addCallback, removeCallback } = useAnimationManager()
 
   const { processedNotes, processedLongNotes, getYAtTime } = useMemo(() => {
     const initialBPM = chart.blocks[0]?.bpm ?? 120
     const segments: { time: number, bpm: number, absY: number }[] = []
 
-    console.log(chart)
     const bpmChanges = chart.blocks.map(block => {
       return {
         time: block.startTime,
@@ -35,7 +36,6 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
     let lastAbsY = 0
 
     segments.push({ time: 0, bpm: currentBPM, absY: 0 })
-    console.log(segments)
 
     bpmChanges.forEach(change => {
       if (change.time > lastTime && change.bpm !== currentBPM) {
@@ -104,7 +104,6 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
 
     if (!canvas || !ctx || !assets) return
 
-    let animationFrameId: number
     const PAD_COUNT = PAD_COUNT_MAP[chart.type]
     const LANE_WIDTH = 64
     const TARGET_Y = 32
@@ -222,13 +221,14 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
           )
         }
       })
-
-      animationFrameId = requestAnimationFrame(render)
     }
 
-    render()
-    return () => cancelAnimationFrame(animationFrameId)
-  }, [chart, audioRef, scrollSpeed, assets, processedNotes, processedLongNotes, getYAtTime])
+    addCallback(render)
+
+    return () => {
+      removeCallback(render)
+    }
+  }, [chart, audioRef, scrollSpeed, assets, processedNotes, processedLongNotes, getYAtTime, addCallback, removeCallback])
 
   useEffect(() => {
     const handleResize = () => {
