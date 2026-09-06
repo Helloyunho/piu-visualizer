@@ -1,4 +1,4 @@
-import { type Chart, type ChartBlock, type Note, NOTE_TYPES } from '@/types/chart'
+import { type Chart, type ChartBlock, type Note, NOTE_TYPES } from '../types/chart'
 
 export const parseUCS = (fileContent: string): Chart => {
   const lines = fileContent.split(/\r?\n/)
