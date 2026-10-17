@@ -38,6 +38,19 @@ const singlePadPositions = [
   { x: 2 - 0.45, y: 2 - 0.5 }
 ]
 
+const doublePadPositions = [
+  { x: 0 + 0.24, y: 2 - 0.5 },
+  { x: 0 + 0.24, y: 0 + 0.5 },
+  { x: 1 - 0.475, y: 1 },
+  { x: 1 - 0.185, y: 0 + 0.5 },
+  { x: 1 - 0.185, y: 2 - 0.5 },
+  { x: 1 + 0.185, y: 2 - 0.5 },
+  { x: 1 + 0.185, y: 0 + 0.5 },
+  { x: 1 + 0.475, y: 1 },
+  { x: 2 - 0.24, y: 0 + 0.5 },
+  { x: 2 - 0.24, y: 2 - 0.5 }
+]
+
 export interface PadProps {
   activePads?: number[]
   type: Chart['type']
@@ -91,9 +104,10 @@ export interface PadPlayerProps {
 }
 
 export function PadPlayer ({ chart, audioRef }: PadPlayerProps) {
+  const positions = chart.type === 'single' ? singlePadPositions : doublePadPositions
   const [activePads, setActivePads] = useState<number[]>([])
-  const [lPos, setLPos] = useState<{ x: number, y: number }>(singlePadPositions[0])
-  const [rPos, setRPos] = useState<{ x: number, y: number }>(singlePadPositions[4])
+  const [lPos, setLPos] = useState<{ x: number, y: number }>(chart.type === 'single' ? positions[0] : positions[4])
+  const [rPos, setRPos] = useState<{ x: number, y: number }>(chart.type === 'single' ? positions[4] : positions[5])
   const { addCallback, removeCallback } = useAnimationManager()
   const { processedNotes } = useMemo(() => {
     const longNotesMap: Record<number, number> = {}
@@ -128,13 +142,13 @@ export function PadPlayer ({ chart, audioRef }: PadPlayerProps) {
       if (currentRow) {
         const lPos = (currentRow.L !== null && currentRow.L.length > 0)
           ? currentRow.L.reduce((prev, curr) => {
-            const pos = singlePadPositions[curr]
+            const pos = positions[curr]
             return { x: prev.x + pos.x / currentRow.L.length, y: prev.y + pos.y / currentRow.L.length }
           }, { x: 0, y: 0 })
           : null
         const rPos = (currentRow.R !== null && currentRow.R.length > 0)
           ? currentRow.R.reduce((prev, curr) => {
-            const pos = singlePadPositions[curr]
+            const pos = positions[curr]
             return { x: prev.x + pos.x / currentRow.R.length, y: prev.y + pos.y / currentRow.R.length }
           }, { x: 0, y: 0 })
           : null
@@ -148,7 +162,7 @@ export function PadPlayer ({ chart, audioRef }: PadPlayerProps) {
     return () => {
       removeCallback(handleTimeUpdate)
     }
-  }, [chart, audioRef, addCallback, removeCallback, processedNotes, predictedFeet])
+  }, [chart, audioRef, addCallback, removeCallback, processedNotes, predictedFeet, positions])
 
   return (
     <div className={cn('relative grid bg-slate-400 p-4 rounded-2xl', chart.type === 'single' ? 'grid-cols-3 w-43 h-43' : chart.type === 'double' ? 'grid-cols-[1fr_1fr_1fr_1rem_1fr_1fr_1fr] w-86 h-43' : 'grid-cols-[1fr_1fr_1rem_1fr_1fr] w-60 h-43')}>

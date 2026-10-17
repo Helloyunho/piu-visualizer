@@ -2,7 +2,7 @@ import { type Chart, type ChartBlock, NOTE_TYPES } from '@/types/chart'
 import { ByteReader } from '@/utils/byte-reader'
 
 const parseNote = (note: [number, number, number]): typeof NOTE_TYPES[keyof typeof NOTE_TYPES] | null => {
-  if ((note[0] === 0 && note[1] === 0 && note[2] === 0) || note[1] === 0 || note[0] >> 5 !== 2) {
+  if ((note[0] === 0 && note[1] === 0 && note[2] === 0) || note[1] === 0 || ((note[0] >> 5) & 7) !== 2 || note[2] >> 14 !== 0) {
     return null
   }
   const long = (note[0] >> 2) & 3
