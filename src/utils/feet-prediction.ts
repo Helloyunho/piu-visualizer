@@ -39,16 +39,16 @@ interface InternalState {
 }
 
 export const padPositions = [
-  { x: -1, y: -1 },
-  { x: -1, y: 1 },
+  { x: -1, y: -1 + 0.125 },
+  { x: -1, y: 1 - 0.125 },
   { x: 0, y: 0 },
-  { x: 1, y: 1 },
-  { x: 1, y: -1 },
-  { x: 2, y: -1 },
-  { x: 2, y: 1 },
+  { x: 1, y: 1 - 0.125 },
+  { x: 1, y: -1 + 0.125 },
+  { x: 2, y: -1 + 0.125 },
+  { x: 2, y: 1 - 0.125 },
   { x: 3, y: 0 },
-  { x: 4, y: -1 },
-  { x: 4, y: 1 },
+  { x: 4, y: 1 - 0.125 },
+  { x: 4, y: -1 + 0.125 },
 ]
 
 const buildChartRows = (chart: Chart): ChartRow[] => {
@@ -271,15 +271,15 @@ const transitionCost = (previous: InternalState, next: FootStance, time: number)
   const costs: number[] = [
     ((previous.footStance.L === next.L)
       ? 0
-      : Math.pow(footMovementCost(previous.footStance.L, next.L), 1) * (500 / (time - previous.footStance.Lt))),
+      : Math.pow(footMovementCost(previous.footStance.L, next.L), 1) * (250 / (time - previous.footStance.Lt))),
     ((previous.footStance.R === next.R)
       ? 0
-      : Math.pow(footMovementCost(previous.footStance.R, next.R), 1) * (500 / (time - previous.footStance.Rt))),
-    (angle - previous.angle !== 0 && previous.angleDelta !== angle - previous.angle) ? Math.abs((angle - previous.angle) - previous.angleDelta) * 2 * (250 / (time - previous.time)) : 0, // give more weight to changes in angle
-    (angle >= Math.PI * 3 / 4 || angle <= -Math.PI * 3 / 4) ? (Math.abs(angle)) * ((time - previous.time) / 100) : 0, // but we still want to give some weight when the angle itself is too extreme
+      : Math.pow(footMovementCost(previous.footStance.R, next.R), 1) * (250 / (time - previous.footStance.Rt))),
+    (angle - previous.angle !== 0) ? Math.abs((angle - previous.angle) - (previous.angleDelta / 2)) * 2 * (250 / (time - previous.time)) : 0, // give more weight to changes in angle
+    (angle >= Math.PI * 0.5 || angle <= -Math.PI * 0.5) ? (Math.abs(angle)) * ((time - previous.time) / 100) : 0, // but we still want to give some weight when the angle itself is too extreme
     (previous.L !== null && next.L !== null && previous.footStance.L !== next.L) ? (isInEitherSet(previous.footStance.L ?? new Set(), next.L) ? 0.3 : 3) * (500 / (time - previous.footStance.Lt)) : 0, // we prefer changing feet
     (previous.R !== null && next.R !== null && previous.footStance.R !== next.R) ? (isInEitherSet(previous.footStance.R ?? new Set(), next.R) ? 0.3 : 3) * (500 / (time - previous.footStance.Rt)) : 0, // we prefer changing feet
-    ((next.L?.size ?? 0) > 1 && next.R === null) || ((next.R?.size ?? 0) > 1 && next.L === null) ? 10 : 0 // use bracket only when needed
+    ((next.L?.size ?? 0) > 1 && next.R === null) || ((next.R?.size ?? 0) > 1 && next.L === null) ? 5 : 0 // use bracket only when needed
   ]
 
   const movement = costs.reduce((sum, cost) => sum + cost, 0)
