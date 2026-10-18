@@ -5,6 +5,7 @@ import './index.css'
 import App from './App.tsx'
 import { ThemeProvider } from '@/components/theme-provider.tsx'
 import { AnimationProvider } from '@/components/animation-provider.tsx'
+import { Toaster } from '@/components/ui/toast.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -13,6 +14,7 @@ createRoot(document.getElementById('root')!).render(
         <Suspense fallback={<div>Loading...</div>}>
           <App />
         </Suspense>
+        <Toaster />
       </AnimationProvider>
     </ThemeProvider>
   </StrictMode>

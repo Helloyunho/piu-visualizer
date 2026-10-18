@@ -4,8 +4,8 @@ import { type Chart, type Note, PAD_COUNT_MAP } from '@/types/chart'
 import { useAnimationManager } from '@/components/animation-provider'
 
 interface ChartPlayerProps {
-  chart: Chart
-  audioRef: React.RefObject<HTMLAudioElement | null>
+  chart?: Chart | null
+  audio: HTMLAudioElement | null
   scrollSpeed?: number
   assets: PreloadAssets
 }
@@ -16,20 +16,20 @@ const padIndexMap: Record<Chart['type'], number[]> = {
   'half-double': [2, 3, 4, 0, 1, 2]
 }
 
-export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: ChartPlayerProps) {
+export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartPlayerProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const { addCallback, removeCallback } = useAnimationManager()
 
   const { processedNotes, processedLongNotes, getYAtTime } = useMemo(() => {
-    const initialBPM = chart.blocks[0]?.bpm ?? 120
+    const initialBPM = chart?.blocks[0]?.bpm ?? 120
     const segments: { time: number, bpm: number, absY: number }[] = []
 
-    const bpmChanges = chart.blocks.map(block => {
+    const bpmChanges = chart?.blocks.map(block => {
       return {
         time: block.startTime,
         bpm: block.bpm
       }
-    }).sort((a, b) => a.time - b.time)
+    }).sort((a, b) => a.time - b.time) ?? []
 
     let currentBPM = initialBPM
     let lastTime = 0
@@ -71,7 +71,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
     }[] = []
     const longNotesMap: Record<number, { startTime: number, startAbsY: number }> = {}
 
-    chart.blocks.forEach(block => {
+    chart?.blocks.forEach(block => {
       block.notes.forEach(note => {
         const absY = getAbsY(note.time)
 
@@ -104,7 +104,9 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
 
     if (!canvas || !ctx || !assets) return
 
-    const PAD_COUNT = PAD_COUNT_MAP[chart.type]
+    const CHART_TYPE = chart?.type ?? 'double'
+
+    const PAD_COUNT = PAD_COUNT_MAP[CHART_TYPE]
     const LANE_WIDTH = 64
     const TARGET_Y = 32
     const GAP = 4
@@ -113,14 +115,14 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
     const currentNotes: (number | null)[] = Array(PAD_COUNT).fill(null)
 
     const render = () => {
-      const audioCurrentTime = (audioRef.current?.currentTime ?? 0) * 1000
+      const audioCurrentTime = (audio?.currentTime ?? 0) * 1000
       ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr)
 
       const currentAbsY = getYAtTime(audioCurrentTime)
 
       for (let i = 0; i < PAD_COUNT; i++) {
         ctx.drawImage(
-          assets.inactives[padIndexMap[chart.type][i]],
+          assets.inactives[padIndexMap[CHART_TYPE][i]],
           startX + (i * LANE_WIDTH) + (i * GAP),
           TARGET_Y,
           LANE_WIDTH,
@@ -148,7 +150,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
         const bodyHeight = Math.abs(endY - startY)
         const drawY = Math.min(startY, endY)
         const totalHeight = bodyHeight + LANE_WIDTH
-        const padIndex = padIndexMap[chart.type][longNote.padIndex]
+        const padIndex = padIndexMap[CHART_TYPE][longNote.padIndex]
 
         if (endY > -100 && startY < canvas.height / dpr + 100) {
           ctx.save()
@@ -178,7 +180,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
           ctx.clip()
 
           ctx.drawImage(
-            assets.longs[padIndexMap[chart.type][longNote.padIndex]],
+            assets.longs[padIndexMap[CHART_TYPE][longNote.padIndex]],
             xPos + 4,
             drawY,
             LANE_WIDTH - 8,
@@ -198,7 +200,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
 
         if (yPos > -100 && yPos < canvas.height / dpr + 100) {
           ctx.drawImage(
-            assets.notes[padIndexMap[chart.type][note.padIndex]],
+            assets.notes[padIndexMap[CHART_TYPE][note.padIndex]],
             xPos,
             yPos,
             LANE_WIDTH,
@@ -213,7 +215,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
           const yPos = TARGET_Y
 
           ctx.drawImage(
-            assets.notes[padIndexMap[chart.type][padIndex]],
+            assets.notes[padIndexMap[CHART_TYPE][padIndex]],
             xPos,
             yPos,
             LANE_WIDTH,
@@ -228,7 +230,7 @@ export function ChartPlayer ({ chart, audioRef, scrollSpeed = 600, assets }: Cha
     return () => {
       removeCallback(render)
     }
-  }, [chart, audioRef, scrollSpeed, assets, processedNotes, processedLongNotes, getYAtTime, addCallback, removeCallback])
+  }, [chart, audio, scrollSpeed, assets, processedNotes, processedLongNotes, getYAtTime, addCallback, removeCallback])
 
   useEffect(() => {
     const handleResize = () => {

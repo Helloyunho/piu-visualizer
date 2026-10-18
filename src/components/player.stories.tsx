@@ -31,11 +31,7 @@ export const Default: StoryObj<typeof meta> = {
       chart: parseUCS(await fetch('/CS342_d18.ucs').then((res) => res.text()))
     }),
     async () => ({
-      assets: await loadChartAssets({
-        noteUrls: [BottomLeft, TopLeft, Center, TopRight, BottomRight],
-        inactiveUrls: [BottomLeftInactive, TopLeftInactive, CenterInactive, TopRightInactive, BottomRightInactive],
-        longUrls: [BottomLeftLong, TopLeftLong, CenterLong, TopRightLong, BottomRightLong]
-      })
+      assets: await loadChartAssets()
     })
   ],
   args: {
