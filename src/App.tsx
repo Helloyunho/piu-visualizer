@@ -121,23 +121,23 @@ export function App () {
         <div className='text-2xl font-bold m-4 xl:hidden'>Good luck using on small screens!</div>
         <div className='flex w-full h-screen gap-4 justify-center p-4'>
           <div className='flex flex-col gap-2 w-24 items-center'>
-            <p>{msToString(currentTime)}</p>
+            <p>{msToString(scrollSpeed < 0 ? duration : currentTime)}</p>
             <Slider
               orientation='vertical'
               disabled={audioFile === null}
               max={duration}
               value={currentTime}
               defaultValue={[0]}
-              className='rotate-180'
+              className={scrollSpeed < 0 ? '' : 'rotate-180'}
               onValueChange={(value) => {
                 if (audio) {
                   // can safely disable this rule since we update currentTime in the useEffect above, and this is only called when the user drags the slider
                   // eslint-disable-next-line react-hooks/immutability
-                  audio.currentTime = (duration - (value as number)) / 1000
+                  audio.currentTime = (scrollSpeed < 0 ? value as number : (duration - (value as number))) / 1000
                 }
               }}
             />
-            <p>{msToString(duration)}</p>
+            <p>{msToString(scrollSpeed < 0 ? duration : currentTime)}</p>
           </div>
           <div className={
             cn('h-full p-4 bg-background rounded-md border',

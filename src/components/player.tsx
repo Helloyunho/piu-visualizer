@@ -108,7 +108,7 @@ export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartP
 
     const PAD_COUNT = PAD_COUNT_MAP[CHART_TYPE]
     const LANE_WIDTH = 64
-    const TARGET_Y = 32
+    const TARGET_Y = scrollSpeed < 0 ? (canvas.height / dpr) - 96 : 32
     const GAP = 4
     const startX = (canvas.width / dpr - (PAD_COUNT * LANE_WIDTH + (PAD_COUNT - 1) * GAP)) / 2
 
@@ -152,7 +152,7 @@ export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartP
         const totalHeight = bodyHeight + LANE_WIDTH
         const padIndex = padIndexMap[CHART_TYPE][longNote.padIndex]
 
-        if (endY > -100 && startY < canvas.height / dpr + 100) {
+        if ((scrollSpeed < 0 && (endY < canvas.height / dpr && startY > -100)) || (endY > -100 && startY < canvas.height / dpr)) {
           ctx.save()
           ctx.beginPath()
 
@@ -198,7 +198,7 @@ export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartP
         const yPos = TARGET_Y + (note.absY - currentAbsY)
         const xPos = startX + (note.padIndex * LANE_WIDTH) + (note.padIndex * GAP)
 
-        if (yPos > -100 && yPos < canvas.height / dpr + 100) {
+        if ((scrollSpeed < 0 && (yPos < canvas.height / dpr + 100 && yPos > -100)) || (yPos > -100 && yPos < canvas.height / dpr + 100)) {
           ctx.drawImage(
             assets.notes[padIndexMap[CHART_TYPE][note.padIndex]],
             xPos,
