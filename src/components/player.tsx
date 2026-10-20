@@ -252,7 +252,14 @@ export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartP
 
     handleResize()
     window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
+    const resizeObserver = new ResizeObserver(handleResize)
+    if (canvasRef.current) {
+      resizeObserver.observe(canvasRef.current)
+    }
+    return () => {
+      window.removeEventListener('resize', handleResize)
+      resizeObserver.disconnect()
+    }
   }, [])
 
   return (
