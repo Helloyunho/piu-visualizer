@@ -108,13 +108,13 @@ export function ChartPlayer ({ chart, audio, scrollSpeed = 600, assets }: ChartP
 
     const PAD_COUNT = PAD_COUNT_MAP[CHART_TYPE]
     const LANE_WIDTH = 64
-    const TARGET_Y = scrollSpeed < 0 ? (canvas.height / dpr) - 96 : 32
     const GAP = 4
-    const startX = (canvas.width / dpr - (PAD_COUNT * LANE_WIDTH + (PAD_COUNT - 1) * GAP)) / 2
 
     const currentNotes: (number | null)[] = Array(PAD_COUNT).fill(null)
 
     const render = () => {
+      const TARGET_Y = scrollSpeed < 0 ? (canvas.height / dpr) - 96 : 32
+      const startX = (canvas.width / dpr - (PAD_COUNT * LANE_WIDTH + (PAD_COUNT - 1) * GAP)) / 2
       const audioCurrentTime = (audio?.currentTime ?? 0) * 1000
       ctx.clearRect(0, 0, canvas.width / dpr, canvas.height / dpr)
 

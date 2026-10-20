@@ -145,10 +145,10 @@ export function App () {
             )
           }
           >
-            <ChartPlayer key={parsedChart?.blocks.join()} chart={parsedChart} audio={audio} scrollSpeed={scrollSpeed} assets={assets} />
+            <ChartPlayer chart={parsedChart} audio={audio} scrollSpeed={scrollSpeed} assets={assets} />
           </div>
           <div className='flex flex-col gap-4 w-full max-w-md'>
-            {showPad && (<PadPlayer key={parsedChart?.blocks.join()} chart={parsedChart} audio={audio} feetPrediction={feetPrediction} />)}
+            {showPad && (<PadPlayer chart={parsedChart} audio={audio} feetPrediction={feetPrediction} />)}
             <Collapsible className='rounded-md' defaultOpen>
               <CollapsibleTrigger render={
                 <Button variant='ghost' className='w-full'>Open Settings
