@@ -1,6 +1,8 @@
 import { type Chart, NOTE_TYPES } from '../types/chart'
 import { msToString } from './time'
 
+// TODO: clean this mess...
+
 type Foot = 'L' | 'R'
 
 interface ChartRow {

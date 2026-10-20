@@ -1,21 +1,5 @@
-# React + TypeScript + Vite + shadcn/ui
+# PIU Step Player
 
-This is a template for a new Vite project with React, TypeScript, and shadcn/ui.
+Put your UCS step file and audio file and it shows your step
 
-## Adding components
-
-To add components to your app, run the following command:
-
-```bash
-npx shadcn@latest add button
-```
-
-This will place the ui components in the `src/components` directory.
-
-## Using components
-
-To use the components in your app, import them as follows:
-
-```tsx
-import { Button } from "@/components/ui/button"
-```
+And it also has feet prediction which is neat ig
