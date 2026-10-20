@@ -1,6 +1,6 @@
 import { useState, useEffect, use, useMemo } from 'react'
 import { PlayIcon, PauseIcon, SquareIcon, ChevronDownIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
+import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Field, FieldLabel } from '@/components/ui/field'
 import type { Chart } from '@/types/chart'
@@ -231,6 +231,7 @@ export function App () {
             </Collapsible>
           </div>
         </div>
+        <p className='text-muted-foreground p-4'>Made by <a href='https://helloyunho.xyz' className={cn(buttonVariants({ variant: 'link' }), 'p-0')}>Helloyunho</a>. This website is <a href='https://github.com/Helloyunho/piu-visualizer' className={cn(buttonVariants({ variant: 'link' }), 'p-0')}>open sourced</a>.</p>
       </div>
     </div>
   )

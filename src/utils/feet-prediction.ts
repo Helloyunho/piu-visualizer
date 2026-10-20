@@ -1,4 +1,5 @@
 import { type Chart, NOTE_TYPES } from '../types/chart'
+import { msToString } from './time'
 
 type Foot = 'L' | 'R'
 
@@ -92,12 +93,12 @@ const buildChartRows = (chart: Chart): ChartRow[] => {
       ends
     })
 
-    for (const padIndex of ends) {
-      currentHolds.delete(padIndex)
-    }
-
     for (const padIndex of starts) {
       currentHolds.add(padIndex)
+    }
+
+    for (const padIndex of ends) {
+      currentHolds.delete(padIndex)
     }
   }
   return rows
@@ -110,36 +111,38 @@ const isInEitherSet = <T>(a: Set<T>, b: Set<T>) => {
 const makeAllFootCombinations = (): FootStance[] => {
   const pads = [null, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   const stances: FootStance[] = []
+  const side1Outer: Array<number | null> = [0, 1, 3, 4]
+  const side2Outer: Array<number | null> = [5, 6, 8, 9]
 
   for (const L of pads) {
     for (const R of pads) {
       if (L === R && L !== null) continue
       stances.push({ L: L !== null ? new Set([L]) : null, R: R !== null ? new Set([R]) : null })
       if (L !== null || R !== null) {
-        if (([0, 1, 3, 4] as Array<number | null>).includes(L) && R !== 2) {
+        if (side1Outer.includes(L) && R !== 2) {
           stances.push({ L: new Set([2, L!]), R: R !== null ? new Set([R]) : null })
-          if (([5, 6, 8, 9] as Array<number | null>).includes(R)) {
+          if (side2Outer.includes(R)) {
             stances.push({ L: new Set([2, L!]), R: new Set([7, R!]) })
           }
         }
-        if (([0, 1, 3, 4] as Array<number | null>).includes(R) && L !== 2) {
+        if (side1Outer.includes(R) && L !== 2) {
           stances.push({ L: L !== null ? new Set([L]) : null, R: new Set([2, R!]) })
-          if (([5, 6, 8, 9] as Array<number | null>).includes(L)) {
+          if (side2Outer.includes(L)) {
             stances.push({ L: new Set([7, L!]), R: new Set([2, R!]) })
           }
         }
-        if (([5, 6, 8, 9] as Array<number | null>).includes(L) && R !== 7) {
+        if (side2Outer.includes(L) && R !== 7) {
           stances.push({ L: new Set([7, L!]), R: R !== null ? new Set([R]) : null })
         }
-        if (([5, 6, 8, 9] as Array<number | null>).includes(R) && L !== 7) {
+        if (side2Outer.includes(R) && L !== 7) {
           stances.push({ L: L !== null ? new Set([L]) : null, R: new Set([7, R!]) })
         }
         if (L === 3 && R !== 6) {
           stances.push({ L: new Set([3, 6]), R: R !== null ? new Set([R]) : null })
-          if (([0, 1, 3, 4] as Array<number | null>).includes(R)) {
+          if ((side1Outer as Array<number | null>).includes(R)) {
             stances.push({ L: new Set([3, 6]), R: new Set([2, R!]) })
           }
-          if (([5, 8, 9] as Array<number | null>).includes(R)) {
+          if (side2Outer.includes(R)) {
             stances.push({ L: new Set([3, 6]), R: new Set([7, R!]) })
           }
           if (R === 4) {
@@ -148,10 +151,10 @@ const makeAllFootCombinations = (): FootStance[] => {
         }
         if (L === 4 && R !== 5) {
           stances.push({ L: new Set([4, 5]), R: R !== null ? new Set([R]) : null })
-          if (([0, 1, 3, 4] as Array<number | null>).includes(R)) {
+          if (side1Outer.includes(R)) {
             stances.push({ L: new Set([4, 5]), R: new Set([2, R!]) })
           }
-          if (([6, 8, 9] as Array<number | null>).includes(R)) {
+          if (side2Outer.includes(R)) {
             stances.push({ L: new Set([4, 5]), R: new Set([7, R!]) })
           }
           if (R === 3) {
@@ -160,10 +163,10 @@ const makeAllFootCombinations = (): FootStance[] => {
         }
         if (R === 3 && L !== 6) {
           stances.push({ L: L !== null ? new Set([L]) : null, R: new Set([3, 6]) })
-          if (([0, 1, 3, 4] as Array<number | null>).includes(L)) {
+          if (side1Outer.includes(L)) {
             stances.push({ L: new Set([2, L!]), R: new Set([3, 6]) })
           }
-          if (([5, 8, 9] as Array<number | null>).includes(L)) {
+          if (side2Outer.includes(L)) {
             stances.push({ L: new Set([7, L!]), R: new Set([3, 6]) })
           }
           if (L === 4) {
@@ -172,10 +175,10 @@ const makeAllFootCombinations = (): FootStance[] => {
         }
         if (R === 4 && L !== 5) {
           stances.push({ L: L !== null ? new Set([L]) : null, R: new Set([4, 5]) })
-          if (([0, 1, 3, 4] as Array<number | null>).includes(L)) {
+          if (side1Outer.includes(L)) {
             stances.push({ L: new Set([2, L!]), R: new Set([4, 5]) })
           }
-          if (([6, 8, 9] as Array<number | null>).includes(L)) {
+          if (side2Outer.includes(L)) {
             stances.push({ L: new Set([7, L!]), R: new Set([4, 5]) })
           }
           if (L === 3) {
@@ -360,7 +363,7 @@ export const predictFeet = (chart: Chart): PredictionState[] => {
 
     if (currentStates.length === 0) {
       console.error(row)
-      throw new Error(`No valid foot placement at ${row.time}ms`)
+      throw new Error(`No valid foot placement at ${msToString(row.time)}`)
     }
   }
 
