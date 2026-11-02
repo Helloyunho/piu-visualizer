@@ -2,7 +2,7 @@ import { useState, useEffect, use, useMemo } from 'react'
 import { PlayIcon, PauseIcon, SquareIcon, ChevronDownIcon } from 'lucide-react'
 import { Button, buttonVariants } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { Field, FieldLabel } from '@/components/ui/field'
+import { Field, FieldDescription, FieldLabel } from '@/components/ui/field'
 import type { Chart } from '@/types/chart'
 import { parseNX20 } from '@/parsers/nx20'
 import { parseUCS } from '@/parsers/ucs'
@@ -16,8 +16,18 @@ import { cn } from '@/lib/utils'
 import { Slider } from '@/components/ui/slider'
 import { useAnimationManager } from '@/components/animation-provider'
 import { msToString } from '@/utils/time'
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 const loadedAssets = loadChartAssets()
+
+const speeds = [1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5, 5.5, 6, 6.5]
 
 export function App () {
   const [stepFile, setStepFile] = useState<File | null>(null)
@@ -31,6 +41,7 @@ export function App () {
   const [feetPrediction, setFeetPrediction] = useState<boolean>(true)
   const [currentTime, setCurrentTime] = useState<number>(0)
   const [duration, setDuration] = useState<number>(1)
+  const [speed, setSpeed] = useState<number>(1)
   const animationManager = useAnimationManager()
   const audio = useMemo(() => {
     if (audioFile) {
@@ -206,15 +217,43 @@ export function App () {
                   <FieldLabel htmlFor='audio-file'>Audio File</FieldLabel>
                   <Input id='audio-file' type='file' onChange={(e) => setAudioFile(e.target.files?.[0] ?? null)} />
                 </Field>
-                <Field>
-                  <FieldLabel htmlFor='auto-velocity'>Auto Velocity</FieldLabel>
-                  <Input
-                    id='auto-velocity'
-                    type='number'
-                    value={autoVelocity}
-                    onChange={(e) => setAutoVelocity(Number(e.target.value))}
-                  />
-                </Field>
+                <div className='flex gap-4'>
+                  <Field>
+                    <FieldLabel htmlFor='auto-velocity'>Auto Velocity</FieldLabel>
+                    <Input
+                      id='auto-velocity'
+                      type='number'
+                      value={autoVelocity}
+                      onChange={(e) => setAutoVelocity(Number(e.target.value))}
+                    />
+                  </Field>
+                  <Field>
+                    <FieldLabel htmlFor='speed'>Speed</FieldLabel>
+                    <Select
+                      items={speeds.map((s) => ({ value: s.toString(), label: `${s}x` }))} value={speed.toString()} onValueChange={(v) => {
+                        const newSpeed = Number(v)
+                        const newVelocity = parsedChart ? parsedChart?.blocks[0].bpm * newSpeed : autoVelocity
+                        setSpeed(newSpeed)
+                        setAutoVelocity(newVelocity)
+                      }}
+                      disabled={parsedChart === null}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder='Speed' />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectGroup>
+                          {speeds.map((speed) => (
+                            <SelectItem key={speed} value={speed.toString()}>
+                              {`${speed}x`}
+                            </SelectItem>
+                          ))}
+                        </SelectGroup>
+                      </SelectContent>
+                    </Select>
+                    <FieldDescription>Speed auto-calculates velocity based on the chart's BPM.</FieldDescription>
+                  </Field>
+                </div>
                 <Field orientation='horizontal'>
                   <Checkbox id='show-pad' name='show-pad' checked={showPad} onCheckedChange={(c) => setShowPad(c)} />
                   <FieldLabel htmlFor='show-pad'>
