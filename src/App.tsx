@@ -148,7 +148,7 @@ export function App () {
                 }
               }}
             />
-            <p>{msToString(scrollSpeed < 0 ? duration : currentTime)}</p>
+            <p>{msToString(scrollSpeed < 0 ? currentTime : duration)}</p>
           </div>
           <div className={
             cn('h-full p-4 bg-background rounded-md border',
